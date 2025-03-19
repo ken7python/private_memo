@@ -16,7 +16,7 @@ type Memo struct {
 	UpdatedAt time.Time
 
 	UserUUID string `gorm:"index;not null"`
-	User     User   `gorm:"foreignKey:UserUUID;references:UUID;constraint:OnDelete:CASCADE"`
+	//User     User   `gorm:"foreignKey:UserUUID;references:UUID;constraint:OnDelete:CASCADE"`
 }
 
 func Show_memos(c *gin.Context) {
@@ -27,7 +27,7 @@ func Show_memos(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "ログインしてください"})
 		return
 	} else {
-		db.Find(&memos).Where("user_uuid = ?", user.UUID)
+		db.Where("user_uuid = ?", user.UUID).Find(&memos)
 		c.JSON(http.StatusOK, gin.H{"memos": memos})
 	}
 }
