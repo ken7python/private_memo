@@ -1,3 +1,4 @@
+// go run main.go database.go user.go memo.go
 package main
 
 import (
@@ -20,8 +21,13 @@ func main() {
 		c.File("templates/login.html")
 	})
 
+	//ユーザー認証
 	r.POST("api/register", register)
 	r.POST("api/login", login)
 	r.GET("api/profile", authMiddleware(), profile)
+	//メモ
+	r.GET("api/memos", authMiddleware(), Show_memos)
+	r.POST("api/add_memo", authMiddleware(), Create_memo)
+
 	r.Run(":8080")
 }

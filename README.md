@@ -23,5 +23,55 @@ SECRET_KEY=your_secret_key
 
 ## 実行方法
 ```sh
-go run main.go database.go user.go
+go run main.go database.go user.go memo.go
+```
+
+## Memo API使い方
+### メモ一覧取得
+`GET api/memos` （JWTトークンが必要）
+
+**ヘッダー**
+```
+Authorization: Bearer <your-jwt-token>
+```
+**リクエスト**
+```
+{
+    "title": "title",
+    "content": "message"
+}
+```
+**レスポンス**
+```
+"memos": [
+        {
+            "ID": 1,
+            "Title": "title",
+            "Content": "message",
+            "CreatedAt": "2025-03-19T17:33:05.773+09:00",
+            "UpdatedAt": "2025-03-19T17:33:05.773+09:00",
+            "UserUUID": "uuid"
+        }
+    ]
+```
+
+### メモ追加
+`POST api/add_memo` （JWTトークンが必要）
+
+**ヘッダー**
+```
+Authorization: Bearer <your-jwt-token>
+```
+**リクエスト**
+```
+{
+    "title": "title",
+    "content": "message"
+}
+```
+**レスポンス**
+```
+{
+    "message": "メモを作成しました"
+}
 ```

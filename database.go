@@ -29,6 +29,7 @@ func InitDB() {
 	}
 	db = database
 	db.AutoMigrate(&User{})
+	db.AutoMigrate(&Memo{})
 
 	log.Println("✅ データベース接続成功")
 }

@@ -8,12 +8,14 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
+	"github.com/google/uuid"
 	"github.com/joho/godotenv"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
 	ID       uint   `gorm:"primaryKey"`
+	UUID     string `gorm:"unique;not null"`
 	Username string `gorm:"unique/not null"`
 	Password string `gorm:"unique/not null"`
 }
@@ -68,7 +70,12 @@ func register(c *gin.Context) {
 		return
 	}
 
-	db.Create(&User{Username: req.Username, Password: string(hashedPassword)})
+	uuid, err := uuid.NewRandom()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "UUIDの生成に失敗しました"})
+		return
+	}
+	db.Create(&User{Username: req.Username, Password: string(hashedPassword), UUID: uuid.String()})
 
 	c.JSON(http.StatusOK, gin.H{"message": "ユーザーを作成しました"})
 }
@@ -145,19 +152,26 @@ func authMiddleware() gin.HandlerFunc {
 
 func profile(c *gin.Context) {
 	println("/profile")
+	user := GetProfile(c)
+	if user != (User{}) {
+		c.JSON(http.StatusOK, gin.H{"ID": user.ID, "username": user.Username})
+	}
+}
+
+func GetProfile(c *gin.Context) User {
 	userID, exists := c.Get("userID")
 	if !exists {
 		println("!exists")
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "認証されていません"})
-		return
+		return User{}
 	}
 
 	var user User
 	if err := db.First(&user, userID).Error; err != nil {
 		println(err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "ユーザーが見つかりません"})
-		return
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "ユーザーが見つかりません"})
+		return User{}
 	}
 
-	c.JSON(http.StatusOK, gin.H{"ID": user.ID, "username": user.Username})
+	return user
 }
